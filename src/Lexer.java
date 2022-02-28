@@ -1,7 +1,8 @@
 /**
  * 
  */
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 /**
  * @author Andres
  *
@@ -43,6 +44,12 @@ public class Lexer {
 			}else if (incomplete_pairs<0) {//there's more closing parenthesis than opening ones
 				result = false;
 				throw new InterpreterException("Opening Parenthesis missing");
+			}
+			Pattern pattern = Pattern.compile("^[(][ ]*[)]$",Pattern.CASE_INSENSITIVE);
+			Matcher matcher = pattern.matcher(expression);
+			if(matcher.find()) {
+				result = false;
+				throw new InterpreterException("Empty expression");
 			}
 		}
 		return result;
