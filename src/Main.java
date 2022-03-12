@@ -12,11 +12,13 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		Variables var = new Variables();
 		Scanner sc = new Scanner(System.in);
 		Lexer lexer = new Lexer();
+		var.dgo();
 		boolean run = true;
 		System.out.println("WELCOME TO THE LISP INTERPRETER \nTO LEAVE, WRITE \"leave\"");
-		while(run) {
+		while(run) {//running process
 			String expressionString=sc.nextLine();
 			if(expressionString.trim().toLowerCase().equals("leave")) {//leave
 				run=false;
@@ -24,12 +26,19 @@ public class Main {
 			}else {
 				boolean evaluation=false;
 				try {
-					evaluation = lexer.general_evaluation(expressionString);
+					evaluation = lexer.general_evaluation(expressionString);//general evaluation of syntax
 				}catch (InterpreterException e) {
-					System.out.println(e);					}
-					if(evaluation) {
+					System.out.println(e);					
+				}
+				if(evaluation) {
 					//expression is correct
-					System.out.println("Correct");
+					try {
+						String outString =lexer.evaluate(expressionString);
+						if(!outString.equals(""))
+							System.out.println("-> "+outString);	//result of the expression
+					}catch (InterpreterException e) {
+						System.out.println(e);
+					}
 				}
 			}
 		}
