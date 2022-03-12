@@ -31,7 +31,7 @@ public class Variables {
 
 	}
 	/**
-	 * dgo secret function
+	 * Diego's secret function
 	 */
 	public void dgo() {
 		vars.put("diego", 69);
@@ -40,7 +40,6 @@ public class Variables {
 	 * 
 	 * @param name name of the variable
 	 * @return the value of the variable
-	 * @throws InterpreterException
 	 */
 	public Integer getVar(String name){		
 		return vars.get(name);
