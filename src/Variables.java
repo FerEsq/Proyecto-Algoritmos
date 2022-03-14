@@ -9,13 +9,13 @@ import java.util.HashMap;
  *
  */
 public class Variables {
-	public static HashMap<String, Integer> vars = new HashMap<String, Integer>();
+	public static HashMap<String, Double> vars = new HashMap<String, Double>();
 	/**
 	 * Creates a new variable
 	 * @param name name of the variable
 	 * @param value value of the variable
 	 */
-	public void add(String name,Integer value){
+	public void add(String name,Double value){
 		boolean exists = false;
         //verify if the variable exists
         for (String i : vars.keySet()) {
@@ -34,14 +34,14 @@ public class Variables {
 	 * Diego's secret function
 	 */
 	public void dgo() {
-		vars.put("diego", 69);
+		vars.put("diego", 69.0);
 	}
 	/**
 	 * 
 	 * @param name name of the variable
 	 * @return the value of the variable
 	 */
-	public Integer getVar(String name){		
+	public Double getVar(String name){		
 		return vars.get(name);
 	}
 }

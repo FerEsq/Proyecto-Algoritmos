@@ -9,12 +9,13 @@ import java.util.regex.Pattern;
  */
 public class Lexer {
 	/*********************PATTERNS************************************************************/
-	Pattern pvariable = Pattern.compile("setq[ ]+[a-z][a-z0-9_]*[ ]+[0-9]+",Pattern.CASE_INSENSITIVE);
+	Pattern pvariable = Pattern.compile("setq[ ]+[a-z][a-z0-9_]*[ ]+[0-9*+\\-/]+",Pattern.CASE_INSENSITIVE);
 	Pattern pStringprint = Pattern.compile("print[ ]+[\"][a-z0-9]+[\"]",Pattern.CASE_INSENSITIVE);
 	Pattern pVarprint = Pattern.compile("print[ ]+[a-z][a-z0-9_]*",Pattern.CASE_INSENSITIVE);
 	Pattern pIntprint = Pattern.compile("print[ ]+[0-9]+",Pattern.CASE_INSENSITIVE);
 	/*****************************************************************************************/
 	Variables variables = new Variables();
+	Arithmetics arithmetics = new Arithmetics();
 	
 	/**
 	 * 
@@ -76,10 +77,22 @@ public class Lexer {
 		for(int i=0;i<splitedExpression.length;i++) {
 			String[] tokens =splitedExpression[i].split(" ");//separates the clean expression in tokens
 			if(pvariable.matcher(splitedExpression[i]).find()) {//matches a variable
-				variables.add(tokens[1],Integer.parseInt( tokens[2]));//saves the variable
+				if(tokens[2].contains("*")||tokens[2].contains("/")||tokens[2].contains("-")||tokens[2].contains("+")) {
+					String ope="";
+					for(int j =2;j<tokens.length;j++) {
+						if(j ==tokens.length-1) {
+							ope+=tokens[j];
+						}else {
+							ope+=tokens[j]+" ";
+						}
+					}
+					variables.add(tokens[1],(arithmetics.prefixcalc(ope)));
+				}else {
+					variables.add(tokens[1],Double.parseDouble((tokens[2])));//saves the variable
+				}
 			}
 			else if(pVarprint.matcher(splitedExpression[i]).find()) {//matches a variable to print
-				Integer value=variables.getVar(tokens[1]);
+				Double value=variables.getVar(tokens[1]);
 				if(value==null)//if the variable doesn't exist
 					throw new InterpreterException("Variable "+ tokens[1]+" not found");
 				else
