@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  */
 public class Lexer {
 	/*********************PATTERNS************************************************************/
-	Pattern pvariable = Pattern.compile("setq[ ]+[a-z][a-z0-9_]*[ ]+[0-9*+\\-/]+",Pattern.CASE_INSENSITIVE);
+	Pattern pvariable = Pattern.compile("setq[ ]+[a-z][a-z0-9_]*[ ]+[0-9*+\\-/ ]+",Pattern.CASE_INSENSITIVE);
 	Pattern pStringprint = Pattern.compile("print[ ]+[\"][a-z0-9]+[\"]",Pattern.CASE_INSENSITIVE);
 	Pattern pVarprint = Pattern.compile("print[ ]+[a-z][a-z0-9_]*",Pattern.CASE_INSENSITIVE);
 	Pattern pIntprint = Pattern.compile("print[ ]+[0-9]+",Pattern.CASE_INSENSITIVE);
@@ -79,14 +79,14 @@ public class Lexer {
 			if(pvariable.matcher(splitedExpression[i]).find()) {//matches a variable
 				if(tokens[2].contains("*")||tokens[2].contains("/")||tokens[2].contains("-")||tokens[2].contains("+")) {
 					String ope="";
-					for(int j =2;j<tokens.length;j++) {
+					for(int j =2;j<tokens.length;j++) { //repairs the splitted operation
 						if(j ==tokens.length-1) {
 							ope+=tokens[j];
 						}else {
 							ope+=tokens[j]+" ";
 						}
 					}
-					variables.add(tokens[1],(arithmetics.prefixcalc(ope)));
+					variables.add(tokens[1],(arithmetics.prefixcalc(ope)));//makes the operation and saves it into a variable
 				}else {
 					variables.add(tokens[1],Double.parseDouble((tokens[2])));//saves the variable
 				}
