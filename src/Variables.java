@@ -41,7 +41,19 @@ public class Variables {
 	 * @param name name of the variable
 	 * @return the value of the variable
 	 */
-	public Double getVar(String name){		
-		return vars.get(name);
+	public Double getVar(String name)throws InterpreterException{	
+		boolean exists = false;
+        //verify if the variable exists
+        for (String i : vars.keySet()) {
+            if(i.equals(name)) {//if exists
+            	exists=true;
+            }
+        }
+        if(exists) {//if not exists, creates a new one
+        	return vars.get(name);
+        }else {
+        	throw new InterpreterException("Variable "+ name + " not found");
+        }
+		
 	}
 }

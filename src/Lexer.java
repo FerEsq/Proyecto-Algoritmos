@@ -9,13 +9,20 @@ import java.util.regex.Pattern;
  */
 public class Lexer {
 	/*********************PATTERNS************************************************************/
-	Pattern pvariable = Pattern.compile("setq[ ]+[a-z][a-z0-9_]*[ ]+[0-9*+\\-/ ]+",Pattern.CASE_INSENSITIVE);
-	Pattern pStringprint = Pattern.compile("print[ ]+[\"][a-z0-9]+[\"]",Pattern.CASE_INSENSITIVE);
-	Pattern pVarprint = Pattern.compile("print[ ]+[a-z][a-z0-9_]*",Pattern.CASE_INSENSITIVE);
-	Pattern pIntprint = Pattern.compile("print[ ]+[0-9]+",Pattern.CASE_INSENSITIVE);
+	Pattern pvariable = Pattern.compile("^setq[ ]+[a-z][a-z0-9_]*[ ]+[0-9*+\\-/ ]+",Pattern.CASE_INSENSITIVE);
+	Pattern pStringprint = Pattern.compile("^print[ ]+[\"][a-z0-9]+[\"]",Pattern.CASE_INSENSITIVE);
+	Pattern pVarprint = Pattern.compile("^print[ ]+[a-z][a-z0-9_]*",Pattern.CASE_INSENSITIVE);
+	Pattern pIntprint = Pattern.compile("^print[ ]+[0-9]+",Pattern.CASE_INSENSITIVE);
+	Pattern pGreater = Pattern.compile("^[>][ ]+[[0-9]|[a-z]]+[ ]+[[0-9]|[a-z]]+",Pattern.CASE_INSENSITIVE);
+	Pattern pSmaller = Pattern.compile("^[<][ ]+[[0-9]|[a-z]]+[ ]+[[0-9]|[a-z]]+",Pattern.CASE_INSENSITIVE);
+	Pattern pEqual = Pattern.compile("^equal[ ]+[[0-9]|[a-z]]+[ ]+[[0-9]|[a-z]]+",Pattern.CASE_INSENSITIVE);
+	Pattern pAtom = Pattern.compile("^atom",Pattern.CASE_INSENSITIVE);
+	Pattern pList = Pattern.compile("^list",Pattern.CASE_INSENSITIVE);
+	Pattern pCond = Pattern.compile("^cond",Pattern.CASE_INSENSITIVE);
 	/*****************************************************************************************/
 	Variables variables = new Variables();
 	Arithmetics arithmetics = new Arithmetics();
+	Predicates predicates = new Predicates();
 	
 	/**
 	 * 
@@ -74,6 +81,19 @@ public class Lexer {
 		String result="";
 		String[] splitedExpression = expression.split("[\\(||//)]");//split the expression between parenthesis
 		splitedExpression = clean_array(splitedExpression);//clean the null slots of the array
+		if(pCond.matcher(splitedExpression[0]).find()){//conditions
+			if(splitedExpression.length>4) {
+				throw new InterpreterException("Function 'cond' can only take one parameter for a true or false result");
+			}else if(splitedExpression.length<3){
+				throw new InterpreterException("Syntax error");
+			}else {		
+				if(evaluate(splitedExpression[1]).equals("T")) {
+					result = evaluate(splitedExpression[2]);
+				}else if (splitedExpression.length==4){
+					result = evaluate(splitedExpression[3]);
+				}
+			}
+		}else {
 		for(int i=0;i<splitedExpression.length;i++) {
 			String[] tokens =splitedExpression[i].split(" ");//separates the clean expression in tokens
 			if(pvariable.matcher(splitedExpression[i]).find()) {//matches a variable
@@ -93,10 +113,7 @@ public class Lexer {
 			}
 			else if(pVarprint.matcher(splitedExpression[i]).find()) {//matches a variable to print
 				Double value=variables.getVar(tokens[1]);
-				if(value==null)//if the variable doesn't exist
-					throw new InterpreterException("Variable "+ tokens[1]+" not found");
-				else
-					result = value+"";
+				result = value+"";
 			}
 			else if(pStringprint.matcher(splitedExpression[i]).find()) {//matches a string to print
 				String string = tokens[1].replace("\"", "");//removes quotation marks
@@ -105,9 +122,37 @@ public class Lexer {
 			else if(pIntprint.matcher(splitedExpression[i]).find()) {//matches an int to print
 				result = tokens[1];
 			}
+			else if(pGreater.matcher(splitedExpression[i]).find()) {//matches an > to evaluate
+				double v1=0;
+				double v2=0;
+				v1=varVal(tokens[1]);
+				v2=varVal(tokens[2]);
+				return predicates.graterThan(v1, v2);
+			}
+			else if(pSmaller.matcher(splitedExpression[i]).find()) {//matches an < to evaluate
+				double v1=0;
+				double v2=0;
+				v1=varVal(tokens[1]);
+				v2=varVal(tokens[2]);
+				return predicates.smallerThan(v1, v2);
+			}
+			else if(pEqual.matcher(splitedExpression[i]).find()) {//matches an equal to evaluate
+				double v1=0;
+				double v2=0;
+				v1=varVal(tokens[1]);
+				v2=varVal(tokens[2]);
+				return predicates.equalsTo(v1, v2);
+			}
+			else if(pAtom.matcher(splitedExpression[i]).find()) {//matches an atom to evaluate
+				return predicates.atom(tokens);
+			}
+			else if(pList.matcher(splitedExpression[i]).find()) {//matches a list to evaluate
+				return predicates.list(tokens);
+			}
 			else {//doesn't match a lisp expression
 				throw new InterpreterException("Syntax error");
 			}
+		}
 		}
 		return result;
 	}
@@ -132,5 +177,32 @@ public class Lexer {
 			}		
 		}
 		return newArray;//return the clean array
+	}
+	private int countExpressions(String[] array) {
+		int express_count=0;
+		for(int i=0;i<array.length;i++) {
+			if (!array[i].equals("[ ]+")) {
+				express_count++;
+			}
+		}
+		return express_count;
+	}
+	private boolean isNumeric(String string) {
+		try {
+			Double.parseDouble(string);
+			return true;
+		}catch (NumberFormatException e) {
+			return false;
+		}
+	}
+	private double varVal(String string) throws InterpreterException{
+		double val=0;
+		if(isNumeric(string)) {
+			val = Double.parseDouble(string);
+		}
+		if (!isNumeric(string)) {
+			val = variables.getVar(string);
+		}
+		return val;
 	}
 }
