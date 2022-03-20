@@ -20,10 +20,13 @@ public class Lexer {
 	Pattern pAtom = Pattern.compile("^atom",Pattern.CASE_INSENSITIVE);
 	Pattern pList = Pattern.compile("^list",Pattern.CASE_INSENSITIVE);
 	Pattern pCond = Pattern.compile("^cond",Pattern.CASE_INSENSITIVE);
+	Pattern pDefun = Pattern.compile("^defun",Pattern.CASE_INSENSITIVE);
+	Pattern pCallfun = Pattern.compile("^[a-z][a-z0-9_]*",Pattern.CASE_INSENSITIVE);
 	/*****************************************************************************************/
 	Variables variables = new Variables();
 	Arithmetics arithmetics = new Arithmetics();
 	Predicates predicates = new Predicates();
+	Functions functions = new Functions();
 	
 	/**
 	 * 
@@ -80,11 +83,23 @@ public class Lexer {
 	 */
 	public String evaluate(String expression) throws InterpreterException{
 		String result="";
-		String[] splitedExpression = expression.split("[\\(||//)]");//split the expression between parenthesis
+		boolean isfunction=true;
+		String[] splitedExpression = expression.split("[\\(||\\)]");//split the expression between parenthesis
 		splitedExpression = clean_array(splitedExpression);//clean the null slots of the array
+		if(pDefun.matcher(splitedExpression[0]).find()) {
+			String[] instructions = new String[splitedExpression.length-2];
+			String parameters = splitedExpression[1];
+			for(int i=2;i<splitedExpression.length;i++) {
+				instructions[i-2]=splitedExpression[i];
+			}
+			String[] funct_name = splitedExpression[0].split(" ");
+			functions.newFunction(funct_name[1], parameters, instructions);
+		}
+		else {
 		for(int i=0;i<splitedExpression.length;i++) {
 			String[] tokens =splitedExpression[i].split(" ");//separates the clean expression in tokens
 			if(pvariable.matcher(splitedExpression[i]).find()) {//matches a variable
+				isfunction=false;
 				if(tokens[2].contains("*")||tokens[2].contains("/")||tokens[2].contains("-")||tokens[2].contains("+")) {
 					String ope="";
 					for(int j =2;j<tokens.length;j++) { //repairs the splitted operation
@@ -100,11 +115,13 @@ public class Lexer {
 				}
 			}
 			else if(pVarprint.matcher(splitedExpression[i]).find()) {//matches a variable to print
+				isfunction=false;
 				result+="-> ";
 				Double value=variables.getVar(tokens[1]);
 				result+= value+""+"\n";
 			}
 			else if(pStringprint.matcher(splitedExpression[i]).find()) {//matches a string to print
+				isfunction=false;
 				result+="-> ";
 				String string = tokens[1].replace("\"", "");//removes quotation marks
 				if(tokens.length>1) {
@@ -115,6 +132,7 @@ public class Lexer {
 				result+= string+"\n";
 			}
 			else if(pQuote.matcher(splitedExpression[i]).find()) {//matches a string to print
+				isfunction=false;
 				result+="-> ";
 				String string = tokens[1].replace("'","");//removes quotation marks
 				if(tokens.length>1) {
@@ -125,10 +143,11 @@ public class Lexer {
 				result+= string+"\n";
 			}
 			else if(pIntprint.matcher(splitedExpression[i]).find()) {//matches an int to print
+				isfunction=false;
 				result+="-> ";
 				if(tokens[1].contains("*")||tokens[1].contains("/")||tokens[1].contains("-")||tokens[1].contains("+")) {
 					String ope="";
-					for(int j =2;j<tokens.length;j++) { //repairs the splitted operation
+					for(int j =1;j<tokens.length;j++) { //repairs the splitted operation
 						if(j ==tokens.length-1) {
 							ope+=tokens[j];
 						}else {
@@ -141,6 +160,7 @@ public class Lexer {
 				}
 			}
 			else if(pGreater.matcher(splitedExpression[i]).find()) {//matches an > to evaluate
+				isfunction=false;
 				result+="-> ";
 				double v1=0;
 				double v2=0;
@@ -149,6 +169,7 @@ public class Lexer {
 				result+= predicates.graterThan(v1, v2)+"\n";
 			}
 			else if(pSmaller.matcher(splitedExpression[i]).find()) {//matches an < to evaluate
+				isfunction=false;
 				result+="-> ";
 				double v1=0;
 				double v2=0;
@@ -157,6 +178,7 @@ public class Lexer {
 				result+= predicates.smallerThan(v1, v2)+"\n";
 			}
 			else if(pEqual.matcher(splitedExpression[i]).find()) {//matches an equal to evaluate
+				isfunction=false;
 				result+="-> ";
 				double v1=0;
 				double v2=0;
@@ -165,14 +187,17 @@ public class Lexer {
 				result+= predicates.equalsTo(v1, v2)+"\n";
 			}
 			else if(pAtom.matcher(splitedExpression[i]).find()) {//matches an atom to evaluate
+				isfunction=false;
 				result+="-> ";
 				result+= predicates.atom(tokens)+"\n";
 			}
 			else if(pList.matcher(splitedExpression[i]).find()) {//matches a list to evaluate
+				isfunction=false;
 				result+="-> ";
 				result+= predicates.list(tokens)+"\n";
 			}
 			else if(pCond.matcher(splitedExpression[i]).find()){//conditions
+				isfunction=false;
 				/*if(splitedExpression.length>3) {
 					throw new InterpreterException("Function 'cond' can only take one parameter for a true or false result");*/
 				if(splitedExpression.length<3){
@@ -188,9 +213,19 @@ public class Lexer {
 					}
 				}
 			}
+			else if(pCallfun.matcher(splitedExpression[i]).find()&&isfunction) {
+				if (tokens.length==1) {
+					String lexedInstruc =functions.functionCall(tokens[0],splitedExpression[i+1]);
+					result +=evaluate(lexedInstruc);
+					i+=1;
+				}else {
+					throw new InterpreterException("Syntax error");
+				}
+			}
 			else {//doesn't match a lisp expression
 				throw new InterpreterException("Syntax error");
 			}
+		}
 		}
 		return result;
 	}
