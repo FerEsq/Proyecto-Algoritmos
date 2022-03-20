@@ -35,7 +35,7 @@ public class Main {
 					try {
 						String outString =lexer.evaluate(expressionString);
 						if(!outString.equals(""))
-							System.out.println("-> "+outString);	//result of the expression
+							System.out.println(outString);	//result of the expression
 					}catch (InterpreterException e) {
 						System.out.println(e);
 					}
