@@ -109,6 +109,11 @@ public class Lexer {
 							ope+=tokens[j]+" ";
 						}
 					}
+					for(int j=2;j<tokens.length;j++) {
+						if(variables.isVar(tokens[j])) {
+							ope=ope.replace(tokens[j], variables.getVar(tokens[j]).intValue()+"");
+						}
+					}
 					variables.add(tokens[1],(arithmetics.prefixcalc(ope)));//makes the operation and saves it into a variable
 				}else {
 					variables.add(tokens[1],Double.parseDouble((tokens[2])));//saves the variable
@@ -152,6 +157,11 @@ public class Lexer {
 							ope+=tokens[j];
 						}else {
 							ope+=tokens[j]+" ";
+						}
+					}
+					for(int j=1;j<tokens.length;j++) {
+						if(variables.isVar(tokens[j])) {
+							ope=ope.replace(tokens[j],variables.getVar(tokens[j]).intValue()+"");
 						}
 					}
 					result+= arithmetics.prefixcalc(ope)+"\n";
@@ -198,16 +208,33 @@ public class Lexer {
 			}
 			else if(pCond.matcher(splitedExpression[i]).find()){//conditions
 				isfunction=false;
+				Boolean istrue= false;
+				Boolean falsestate= false;
+				Pattern pFalse = Pattern.compile("^t",Pattern.CASE_INSENSITIVE);
 				/*if(splitedExpression.length>3) {
 					throw new InterpreterException("Function 'cond' can only take one parameter for a true or false result");*/
 				if(splitedExpression.length<3){
 					throw new InterpreterException("Syntax error");
 				}else {	
+					if(splitedExpression.length>i+3) {
+						if(pFalse.matcher(splitedExpression[i+3]).find()) {
+							falsestate = true;
+						}
+					}
 					if(predEval(splitedExpression[i+1]).equals("T")) {
 						i+=2;
-						result+= evaluate(splitedExpression[i]);				
-					/*}else if (splitedExpression.length==4&&evaluate(splitedExpression[1]).equals("NIL")){
-						result += evaluate(splitedExpression[3]);*/
+						result+= evaluate(splitedExpression[i]);	
+						istrue=true;
+						if(falsestate) {
+							i+=2;
+						}
+					}else if (!istrue&&predEval(splitedExpression[i+1]).equals("NIL")){
+						if(falsestate) {
+							result += evaluate(splitedExpression[i+4]);
+							i+=4;
+						}else {
+							i+=2;
+						}				
 					}else {
 						i+=2;
 					}
@@ -215,7 +242,14 @@ public class Lexer {
 			}
 			else if(pCallfun.matcher(splitedExpression[i]).find()&&isfunction) {
 				if (tokens.length==1) {
-					String lexedInstruc =functions.functionCall(tokens[0],splitedExpression[i+1]);
+					String paramsString = splitedExpression[i+1];
+					String[] param = paramsString.split(",");
+					for(int j=0; j<param.length;j++) {
+						if(variables.isVar(param[i])) {
+							paramsString = paramsString.replace(param[i], variables.getVar(param[i])+"");
+						}
+					}
+					String lexedInstruc =functions.functionCall(tokens[0],paramsString);
 					result +=evaluate(lexedInstruc);
 					i+=1;
 				}else {

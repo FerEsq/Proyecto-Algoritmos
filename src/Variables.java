@@ -16,7 +16,8 @@ public class Variables {
 	 * @param value value of the variable
 	 */
 	public void add(String name,Double value){
-		boolean exists = false;
+		vars.put(name, value);
+		/*boolean exists = false;
         //verify if the variable exists
         for (String i : vars.keySet()) {
             if(i.equals(name)) {//if exists
@@ -27,7 +28,7 @@ public class Variables {
         }
         if(!exists) {//if not exists, creates a new one
         	vars.put(name, value);
-        }
+        }*/
 
 	}
 	/**
@@ -55,5 +56,14 @@ public class Variables {
         	throw new InterpreterException("Variable "+ name + " not found");
         }
 		
+	}
+	public boolean isVar(String string) {
+		boolean exists = false;
+		for (String i : vars.keySet()) {
+			if(i.equals(string)) {
+				exists=true;
+			}
+		}
+		return exists;
 	}
 }
