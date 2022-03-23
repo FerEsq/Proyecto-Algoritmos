@@ -241,8 +241,8 @@ public class Lexer {
 				}
 			}
 			else if(pCallfun.matcher(splitedExpression[i]).find()&&isfunction) {
-				if (tokens.length==1) {
-					String paramsString = splitedExpression[i+1];
+				if (tokens.length==2) {
+					String paramsString = tokens[1];
 					String[] param = paramsString.split(",");
 					for(int j=0; j<param.length;j++) {
 						if(variables.isVar(param[i])) {
