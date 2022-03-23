@@ -17,6 +17,9 @@ public class Variables {
 	 */
 	public void add(String name,Double value){
 		vars.put(name, value);
+		/************************
+		 * Test (ignore)
+		 */
 		/*boolean exists = false;
         //verify if the variable exists
         for (String i : vars.keySet()) {
@@ -57,6 +60,11 @@ public class Variables {
         }
 		
 	}
+	/**
+	 * Function that returns true if the variable exists
+	 * @param variable to find
+	 * @return true if the variable exists
+	 */
 	public boolean isVar(String string) {
 		boolean exists = false;
 		for (String i : vars.keySet()) {

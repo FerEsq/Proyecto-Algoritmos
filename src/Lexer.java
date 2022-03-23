@@ -22,6 +22,7 @@ public class Lexer {
 	Pattern pCond = Pattern.compile("^cond",Pattern.CASE_INSENSITIVE);
 	Pattern pDefun = Pattern.compile("^defun",Pattern.CASE_INSENSITIVE);
 	Pattern pCallfun = Pattern.compile("^[a-z][a-z0-9_]*",Pattern.CASE_INSENSITIVE);
+	Pattern pArithmetics = Pattern.compile("^[*+\\-/][0-9*+\\-/ ]*",Pattern.CASE_INSENSITIVE);
 	/*****************************************************************************************/
 	Variables variables = new Variables();
 	Arithmetics arithmetics = new Arithmetics();
@@ -29,7 +30,7 @@ public class Lexer {
 	Functions functions = new Functions();
 	
 	/**
-	 * 
+	 * General evaluation to find syntax errors
 	 * @param expression expression to evaluate
 	 * @return true if the expression is correct
 	 * @throws InterpreterException exception of the interpreter
@@ -76,196 +77,264 @@ public class Lexer {
 	}
 	
 	/**
-	 * 
+	 * Evaluation of expressions
 	 * @param expression expression to evaluate
 	 * @return the result of the expression
 	 * @throws InterpreterException
 	 */
 	public String evaluate(String expression) throws InterpreterException{
 		String result="";
-		boolean isfunction=true;
-		String[] splitedExpression = expression.split("[\\(||\\)]");//split the expression between parenthesis
-		splitedExpression = clean_array(splitedExpression);//clean the null slots of the array
-		if(pDefun.matcher(splitedExpression[0]).find()) {
-			String[] instructions = new String[splitedExpression.length-2];
-			String parameters = splitedExpression[1];
-			for(int i=2;i<splitedExpression.length;i++) {
-				instructions[i-2]=splitedExpression[i];
+		try {
+			boolean isfunction=true;
+			String[] splitedExpression = expression.split("[\\(||\\)]");//split the expression between parenthesis
+			splitedExpression = clean_array(splitedExpression);//clean the null slots of the array
+			/**
+			 * Defun expression found
+			 */
+			if(pDefun.matcher(splitedExpression[0]).find()) {
+				String[] instructions = new String[splitedExpression.length-2];
+				String parameters = splitedExpression[1];
+				for(int i=2;i<splitedExpression.length;i++) {
+					instructions[i-2]=splitedExpression[i];
+				}
+				String[] funct_name = splitedExpression[0].split(" ");
+				functions.newFunction(funct_name[1], parameters, instructions);//creates new function with the parameters and instructions sent
 			}
-			String[] funct_name = splitedExpression[0].split(" ");
-			functions.newFunction(funct_name[1], parameters, instructions);
-		}
-		else {
-		for(int i=0;i<splitedExpression.length;i++) {
-			String[] tokens =splitedExpression[i].split(" ");//separates the clean expression in tokens
-			if(pvariable.matcher(splitedExpression[i]).find()) {//matches a variable
-				isfunction=false;
-				if(tokens[2].contains("*")||tokens[2].contains("/")||tokens[2].contains("-")||tokens[2].contains("+")) {
-					String ope="";
-					for(int j =2;j<tokens.length;j++) { //repairs the splitted operation
-						if(j ==tokens.length-1) {
-							ope+=tokens[j];
+			else {
+				for(int i=0;i<splitedExpression.length;i++) {// cycle of expressions
+					String[] tokens =splitedExpression[i].split(" ");//separates the clean expression in tokens
+					/****************************
+					 * Matches a variable
+					 */
+					if(pvariable.matcher(splitedExpression[i]).find()) {//matches a variable
+						isfunction=false;
+						if(tokens[2].contains("*")||tokens[2].contains("/")||tokens[2].contains("-")||tokens[2].contains("+")) {
+							String ope="";
+							for(int j =2;j<tokens.length;j++) { //repairs the splitted operation
+								if(j ==tokens.length-1) {
+									ope+=tokens[j];
+								}else {
+									ope+=tokens[j]+" ";
+								}
+							}
+							for(int j=2;j<tokens.length;j++) {
+								if(variables.isVar(tokens[j])) {
+									ope=ope.replace(tokens[j], variables.getVar(tokens[j]).intValue()+"");
+								}
+							}
+							variables.add(tokens[1],(arithmetics.prefixcalc(ope)));//makes the operation and saves it into a variable
 						}else {
-							ope+=tokens[j]+" ";
+							variables.add(tokens[1],Double.parseDouble((tokens[2])));//saves the variable
 						}
 					}
-					for(int j=2;j<tokens.length;j++) {
-						if(variables.isVar(tokens[j])) {
-							ope=ope.replace(tokens[j], variables.getVar(tokens[j]).intValue()+"");
+					/****************************
+					 * Matches print of a variable
+					 */
+					else if(pVarprint.matcher(splitedExpression[i]).find()) {//matches a variable to print
+						isfunction=false;
+						result+="-> ";
+						Double value=variables.getVar(tokens[1]);
+						result+= value+""+"\n";
+					}
+					/****************************
+					 * Matches print of a string
+					 */
+					else if(pStringprint.matcher(splitedExpression[i]).find()) {//matches a string to print
+						isfunction=false;
+						result+="-> ";
+						String string = tokens[1].replace("\"", "");//removes quotation marks
+						if(tokens.length>1) {
+							for (int j=2;j<tokens.length;j++) {
+								string +=" "+tokens[j];
+							}
 						}
+						result+= string+"\n";
 					}
-					variables.add(tokens[1],(arithmetics.prefixcalc(ope)));//makes the operation and saves it into a variable
-				}else {
-					variables.add(tokens[1],Double.parseDouble((tokens[2])));//saves the variable
-				}
-			}
-			else if(pVarprint.matcher(splitedExpression[i]).find()) {//matches a variable to print
-				isfunction=false;
-				result+="-> ";
-				Double value=variables.getVar(tokens[1]);
-				result+= value+""+"\n";
-			}
-			else if(pStringprint.matcher(splitedExpression[i]).find()) {//matches a string to print
-				isfunction=false;
-				result+="-> ";
-				String string = tokens[1].replace("\"", "");//removes quotation marks
-				if(tokens.length>1) {
-					for (int j=2;j<tokens.length;j++) {
-						string +=" "+tokens[j];
+					/****************************
+					 * Matches a quote
+					 */
+					else if(pQuote.matcher(splitedExpression[i]).find()) {//matches a string to print
+						isfunction=false;
+						result+="-> ";
+						String string = tokens[1].replace("'","");//removes quotation marks
+						if(tokens.length>1) {
+							for (int j=2;j<tokens.length;j++) {
+								string +=" "+tokens[j];
+							}
+						}
+						result+= string+"\n";
 					}
-				}
-				result+= string+"\n";
-			}
-			else if(pQuote.matcher(splitedExpression[i]).find()) {//matches a string to print
-				isfunction=false;
-				result+="-> ";
-				String string = tokens[1].replace("'","");//removes quotation marks
-				if(tokens.length>1) {
-					for (int j=2;j<tokens.length;j++) {
-						string +=" "+tokens[j];
-					}
-				}
-				result+= string+"\n";
-			}
-			else if(pIntprint.matcher(splitedExpression[i]).find()) {//matches an int to print
-				isfunction=false;
-				result+="-> ";
-				if(tokens[1].contains("*")||tokens[1].contains("/")||tokens[1].contains("-")||tokens[1].contains("+")) {
-					String ope="";
-					for(int j =1;j<tokens.length;j++) { //repairs the splitted operation
-						if(j ==tokens.length-1) {
-							ope+=tokens[j];
+					/****************************
+					 * Matches print of an int or an arithmetic operation
+					 */
+					else if(pIntprint.matcher(splitedExpression[i]).find()) {//matches an int to print
+						isfunction=false;
+						result+="-> ";
+						if(tokens[1].contains("*")||tokens[1].contains("/")||tokens[1].contains("-")||tokens[1].contains("+")) {
+							String ope="";
+							for(int j =1;j<tokens.length;j++) { //repairs the splitted operation
+								if(j ==tokens.length-1) {
+									ope+=tokens[j];
+								}else {
+									ope+=tokens[j]+" ";
+								}
+							}
+							for(int j=1;j<tokens.length;j++) {
+								if(variables.isVar(tokens[j])) {
+									ope=ope.replace(tokens[j],variables.getVar(tokens[j]).intValue()+"");
+								}
+							}
+							result+= arithmetics.prefixcalc(ope)+"\n";
 						}else {
-							ope+=tokens[j]+" ";
+							result+= tokens[1]+"\n";
 						}
 					}
-					for(int j=1;j<tokens.length;j++) {
-						if(variables.isVar(tokens[j])) {
-							ope=ope.replace(tokens[j],variables.getVar(tokens[j]).intValue()+"");
+					/****************************
+					 * Matches the predicate greater than (only for print purposes)
+					 */
+					else if(pGreater.matcher(splitedExpression[i]).find()) {//matches an > to evaluate
+						isfunction=false;
+						result+="-> ";
+						double v1=0;
+						double v2=0;
+						v1=varVal(tokens[1]);
+						v2=varVal(tokens[2]);
+						result+= predicates.graterThan(v1, v2)+"\n";
+					}
+					/****************************
+					 * Matches the predicate smaller than (only for print purposes)
+					 */
+					else if(pSmaller.matcher(splitedExpression[i]).find()) {//matches an < to evaluate
+						isfunction=false;
+						result+="-> ";
+						double v1=0;
+						double v2=0;
+						v1=varVal(tokens[1]);
+						v2=varVal(tokens[2]);
+						result+= predicates.smallerThan(v1, v2)+"\n";
+					}
+					/****************************
+					 * Matches the predicate equal (only for print purposes)
+					 */
+					else if(pEqual.matcher(splitedExpression[i]).find()) {//matches an equal to evaluate
+						isfunction=false;
+						result+="-> ";
+						double v1=0;
+						double v2=0;
+						v1=varVal(tokens[1]);
+						v2=varVal(tokens[2]);
+						result+= predicates.equalsTo(v1, v2)+"\n";
+					}
+					/****************************
+					 * Matches the predicate atom (only for print purposes)
+					 */
+					else if(pAtom.matcher(splitedExpression[i]).find()) {//matches an atom to evaluate
+						isfunction=false;
+						result+="-> ";
+						result+= predicates.atom(tokens)+"\n";
+					}
+					/****************************
+					 * Matches the predicate list (only for print purposes)
+					 */
+					else if(pList.matcher(splitedExpression[i]).find()) {//matches a list to evaluate
+						isfunction=false;
+						result+="-> ";
+						result+= predicates.list(tokens)+"\n";
+					}
+					/****************************
+					 * Matches a condition
+					 */
+					else if(pCond.matcher(splitedExpression[i]).find()){//conditions
+						isfunction=false;
+						Boolean istrue= false;
+						Boolean falsestate= false;
+						Pattern pFalse = Pattern.compile("^t",Pattern.CASE_INSENSITIVE);//case of false
+						/*if(splitedExpression.length>3) {
+							throw new InterpreterException("Function 'cond' can only take one parameter for a true or false result");*/
+						if(splitedExpression.length<3){
+							throw new InterpreterException("Syntax error");
+						}else {	
+							if(splitedExpression.length>i+3) {//finds if there is a false state
+								if(pFalse.matcher(splitedExpression[i+3]).find()) {
+									falsestate = true;
+								}
+							}
+							if(predEval(splitedExpression[i+1]).equals("T")) {//if the predicate is true
+								i+=2;
+								result+= evaluate(splitedExpression[i]);	//evaluates the true state
+								istrue=true;
+								if(falsestate) {
+									i+=2;
+								}
+							}else if (!istrue&&predEval(splitedExpression[i+1]).equals("NIL")){//if predicate is false
+								if(falsestate) {
+									result += evaluate(splitedExpression[i+4]); // evaluates the false state
+									i+=4;
+								}else {
+									i+=2;
+								}				
+							}else {
+								i+=2;
+							}
 						}
 					}
-					result+= arithmetics.prefixcalc(ope)+"\n";
-				}else {
-					result+= tokens[1]+"\n";
-				}
-			}
-			else if(pGreater.matcher(splitedExpression[i]).find()) {//matches an > to evaluate
-				isfunction=false;
-				result+="-> ";
-				double v1=0;
-				double v2=0;
-				v1=varVal(tokens[1]);
-				v2=varVal(tokens[2]);
-				result+= predicates.graterThan(v1, v2)+"\n";
-			}
-			else if(pSmaller.matcher(splitedExpression[i]).find()) {//matches an < to evaluate
-				isfunction=false;
-				result+="-> ";
-				double v1=0;
-				double v2=0;
-				v1=varVal(tokens[1]);
-				v2=varVal(tokens[2]);
-				result+= predicates.smallerThan(v1, v2)+"\n";
-			}
-			else if(pEqual.matcher(splitedExpression[i]).find()) {//matches an equal to evaluate
-				isfunction=false;
-				result+="-> ";
-				double v1=0;
-				double v2=0;
-				v1=varVal(tokens[1]);
-				v2=varVal(tokens[2]);
-				result+= predicates.equalsTo(v1, v2)+"\n";
-			}
-			else if(pAtom.matcher(splitedExpression[i]).find()) {//matches an atom to evaluate
-				isfunction=false;
-				result+="-> ";
-				result+= predicates.atom(tokens)+"\n";
-			}
-			else if(pList.matcher(splitedExpression[i]).find()) {//matches a list to evaluate
-				isfunction=false;
-				result+="-> ";
-				result+= predicates.list(tokens)+"\n";
-			}
-			else if(pCond.matcher(splitedExpression[i]).find()){//conditions
-				isfunction=false;
-				Boolean istrue= false;
-				Boolean falsestate= false;
-				Pattern pFalse = Pattern.compile("^t",Pattern.CASE_INSENSITIVE);
-				/*if(splitedExpression.length>3) {
-					throw new InterpreterException("Function 'cond' can only take one parameter for a true or false result");*/
-				if(splitedExpression.length<3){
-					throw new InterpreterException("Syntax error");
-				}else {	
-					if(splitedExpression.length>i+3) {
-						if(pFalse.matcher(splitedExpression[i+3]).find()) {
-							falsestate = true;
-						}
-					}
-					if(predEval(splitedExpression[i+1]).equals("T")) {
-						i+=2;
-						result+= evaluate(splitedExpression[i]);	
-						istrue=true;
-						if(falsestate) {
-							i+=2;
-						}
-					}else if (!istrue&&predEval(splitedExpression[i+1]).equals("NIL")){
-						if(falsestate) {
-							result += evaluate(splitedExpression[i+4]);
-							i+=4;
+					/****************************
+					 * Matches an arithmetic operation
+					 */
+					else if(pArithmetics.matcher(splitedExpression[i]).find()) {
+						isfunction=false;
+						result+="-> ";
+						if(tokens[0].contains("*")||tokens[0].contains("/")||tokens[0].contains("-")||tokens[0].contains("+")) {
+							String ope="";
+							for(int j =0;j<tokens.length;j++) { //repairs the splitted operation
+								if(j ==tokens.length-1) {
+									ope+=tokens[j];
+								}else {
+									ope+=tokens[j]+" ";
+								}
+							}
+							for(int j=0;j<tokens.length;j++) {
+								if(variables.isVar(tokens[j])) {
+									ope=ope.replace(tokens[j],variables.getVar(tokens[j]).intValue()+"");
+								}
+							}
+							result+= arithmetics.prefixcalc(ope)+"\n";
 						}else {
-							i+=2;
-						}				
-					}else {
-						i+=2;
-					}
-				}
-			}
-			else if(pCallfun.matcher(splitedExpression[i]).find()&&isfunction) {
-				if (tokens.length==2) {
-					String paramsString = tokens[1];
-					String[] param = paramsString.split(",");
-					for(int j=0; j<param.length;j++) {
-						if(variables.isVar(param[i])) {
-							paramsString = paramsString.replace(param[i], variables.getVar(param[i])+"");
+							result+= tokens[0]+"\n";
 						}
 					}
-					String lexedInstruc =functions.functionCall(tokens[0],paramsString);
-					result +=evaluate(lexedInstruc);
-					i+=1;
-				}else {
-					throw new InterpreterException("Syntax error");
+					/****************************
+					 * Matches the call of a function
+					 */
+					else if(pCallfun.matcher(splitedExpression[i]).find()&&isfunction) {
+						if (tokens.length==2) {
+							String paramsString = tokens[1];
+							String[] param = paramsString.split(",");
+							for(int j=0; j<param.length;j++) {//replace the variables with their values
+								if(variables.isVar(param[i])) {
+									paramsString = paramsString.replace(param[i], variables.getVar(param[i])+"");
+								}
+							}
+							String lexedInstruc =functions.functionCall(tokens[0],paramsString);//searches for the function and return the operations in it
+							result +=evaluate(lexedInstruc);//evaluate the operations of the function
+							i+=1;
+						}else {
+							throw new InterpreterException("Syntax error");
+						}
+					}
+					else {//doesn't match a lisp expression
+						throw new InterpreterException("Syntax error");
+					}
 				}
 			}
-			else {//doesn't match a lisp expression
-				throw new InterpreterException("Syntax error");
-			}
-		}
+		}catch (Exception e) {
+			throw new InterpreterException("Syntax error");
 		}
 		return result;
 	}
 	
 	/**
-	 * 
+	 * Function that cleans arrays and return the cleaned array
 	 * @param array array to be cleaned
 	 * @return cleaned array
 	 */
@@ -303,7 +372,16 @@ public class Lexer {
 		}
 		return val;
 	}
+	/**
+	 * Function that evaluates a predicate and return T if the statement is true and NIL if is false
+	 * @param pred predicate to evaluate
+	 * @return the evaluation of the predicate
+	 * @throws InterpreterException
+	 */
 	private String predEval(String pred) throws InterpreterException{
+		/****************************
+		 * All predicates for condition purposes
+		 */
 		String[] tokens =pred.split(" ");
 		if(pGreater.matcher(pred).find()) {//matches an > to evaluate
 			double v1=0;

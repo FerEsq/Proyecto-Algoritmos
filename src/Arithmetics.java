@@ -9,6 +9,13 @@ import java.util.*;
  *
  */
 public class Arithmetics {
+	/**
+	 * 
+	 * @param c character to evaluate
+	 * @return true if its an operator 
+	 * https://algorithms.tutorialhorizon.com/evaluation-of-prefix-expressions-polish-notation-set-2/
+	 * Modified by: Andrés Montoya
+	 */
 	private boolean isOp(char c) {
 		if(c>=48&&c<=57) {
 			return true;
