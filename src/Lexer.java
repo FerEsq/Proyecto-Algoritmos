@@ -1,12 +1,19 @@
-/**
- * 
- */
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 /**
- * @author Andres
- *
+ * Class Lexer 
+ * 
+ * Clase lexer del interprete
+ * 
+ * @version 1.8, 22/03/2022
+ * 
+ * @author 
+ * Andres E. Montoya W. - 21552
+ * Diego E. Lemus L. - 21469
+ * Fernanda Esquivel - 21542
  */
+
 public class Lexer {
 	/*********************PATTERNS************************************************************/
 	Pattern pvariable = Pattern.compile("^setq[ ]+[a-z][a-z0-9_]*[ ]+[0-9*+\\-/ ]+",Pattern.CASE_INSENSITIVE);

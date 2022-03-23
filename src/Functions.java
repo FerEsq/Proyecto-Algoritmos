@@ -1,15 +1,19 @@
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-
 /**
+ * Class Functions
  * 
+ * Clase que maneja las funciones del interprete
+ * 
+ * @version 1.0, 21/03/2022
+ * 
+ * @author 
+ * Andres E. Montoya W. - 21552
+ * Diego E. Lemus L. - 21469
+ * Fernanda Esquivel - 21542
  */
 
-/**
- * @author Andres
- *
- */
 public class Functions {
 	HashMap<String, String> functions = new HashMap<String, String>();
 	HashMap<String, LinkedHashMap<String, String>> functionParameters = new HashMap<String, LinkedHashMap<String, String>>();

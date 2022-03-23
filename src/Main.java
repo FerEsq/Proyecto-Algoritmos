@@ -1,11 +1,18 @@
-/**
- * 
- */
 import java.util.Scanner;
+
 /**
- * @author Andres
- *
+ * Class Main
+ * 
+ * Clase driver del programa
+ * 
+ * @version 1.4, 20/03/2022
+ * 
+ * @author 
+ * Andres E. Montoya W. - 21552
+ * Diego E. Lemus L. - 21469
+ * Fernanda Esquivel - 21542
  */
+
 public class Main {
 
 	/**

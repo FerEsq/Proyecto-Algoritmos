@@ -1,11 +1,17 @@
-/**
- * 
- */
 
 /**
- * @author Andres
- *
+ * Class Predicates
+ * 
+ * Clase que maneja los predicados de las condicionales del interprete
+ * 
+ * @version 1.0, 20/03/2022
+ * 
+ * @author 
+ * Andres E. Montoya W. - 21552
+ * Diego E. Lemus L. - 21469
+ * Fernanda Esquivel - 21542
  */
+
 public class Predicates {
 	/**
 	 * 

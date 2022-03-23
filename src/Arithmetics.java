@@ -1,13 +1,18 @@
 import java.util.*;
 
 /**
+ * Class Arithmetics
  * 
+ * Clase que maneja la aritmetica del interprete
+ * 
+ * @version 1.0, 13/03/2022
+ * 
+ * @author 
+ * Andres E. Montoya W. - 21552
+ * Diego E. Lemus L. - 21469
+ * Fernanda Esquivel - 21542
  */
 
-/**
- * @author Andres
- *
- */
 public class Arithmetics {
 	/**
 	 * 

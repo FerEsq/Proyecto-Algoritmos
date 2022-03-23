@@ -1,13 +1,18 @@
 import java.util.HashMap;
 
 /**
+ * Class Variables
  * 
+ * Clase que maneja las variables del interprete
+ * 
+ * @version 1.3, 21/03/2022
+ * 
+ * @author 
+ * Andres E. Montoya W. - 21552
+ * Diego E. Lemus L. - 21469
+ * Fernanda Esquivel - 21542
  */
 
-/**
- * @author Andres
- *
- */
 public class Variables {
 	public static HashMap<String, Double> vars = new HashMap<String, Double>();
 	/**
