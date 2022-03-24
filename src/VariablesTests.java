@@ -1,8 +1,12 @@
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
+import org.junit.rules.ExpectedException;
 
 class VariablesTests {
+	
+	//public InterpreterException thrown = InterpreterException.none();
+	//Expected ex = InterpreterException.class();
 
 	// ----------------- get variable -----------------
 	@Test
@@ -13,13 +17,42 @@ class VariablesTests {
 		assertEquals(43678.0, var.getVar(name));
 	}
 	
-	// ----------------- get variable -----------------
+	// ----------------- get variable exception -----------------
 	@Test
-	void isVarTest() throws InterpreterException {
+	void getVarETest() throws InterpreterException {
+		Variables var = new Variables();
+		
+		assertThrows(InterpreterException.class, () -> {
+			String name = "x";
+			var.getVar(name);
+		});
+	}
+	
+	// ----------------- get variable true -----------------
+	@Test
+	void isVarTTest() throws InterpreterException {
 		Variables var = new Variables();
 		String name = "y";
 		var.add(name, 123.0);
 		assertEquals(true, var.isVar(name));
 	}
+	
+	// ----------------- get variable false -----------------
+	@Test
+	void isVarFTest() throws InterpreterException {
+		Variables var = new Variables();
+		String name = "y";
+		//var.add(name, 123.0);
+		assertEquals(false, var.isVar(name));
+	}
+	
+	// ----------------- get variable false -----------------
+		@Test
+		void getDiegoTest() throws InterpreterException {
+			Variables var = new Variables();
+			String name = "diego";
+			var.dgo();
+			assertEquals(69.0, var.getVar(name));
+		}
 
 }
