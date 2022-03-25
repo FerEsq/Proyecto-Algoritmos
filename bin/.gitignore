@@ -1,6 +1,7 @@
-/FunctionsTests.class
-/ArithmeticsTests.class
-/VariablesTests.class
-/PredicatesTests.class
-/LexerTest.class
-/MainTest.class
+/Arithmetics.class
+/Functions.class
+/InterpreterException.class
+/Lexer.class
+/Main.class
+/Predicates.class
+/Variables.class
