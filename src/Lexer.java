@@ -16,25 +16,42 @@ import java.util.regex.Pattern;
 
 public class Lexer {
 	/*********************PATTERNS************************************************************/
+	//variable creation
 	Pattern pvariable = Pattern.compile("^setq[ ]+[a-z][a-z0-9_]*[ ]+[0-9*+\\-/ ]+",Pattern.CASE_INSENSITIVE);
+	//string printing
 	Pattern pStringprint = Pattern.compile("^print[ ]+[\"][a-z0-9]+[\"]",Pattern.CASE_INSENSITIVE);
+	//var printing
 	Pattern pVarprint = Pattern.compile("^print[ ]+[a-z][a-z0-9_]*",Pattern.CASE_INSENSITIVE);
+	//int printing
 	Pattern pIntprint = Pattern.compile("^print[ ]+[0-9*+\\-/ ]+",Pattern.CASE_INSENSITIVE);
+	//quote
 	Pattern pQuote = Pattern.compile("^'|^quote",Pattern.CASE_INSENSITIVE);
+	//condition greater
 	Pattern pGreater = Pattern.compile("^[>][ ]+[[0-9]|[a-z]]+[ ]+[[0-9]|[a-z]]+",Pattern.CASE_INSENSITIVE);
+	//condition smaller
 	Pattern pSmaller = Pattern.compile("^[<][ ]+[[0-9]|[a-z]]+[ ]+[[0-9]|[a-z]]+",Pattern.CASE_INSENSITIVE);
+	//condition equal
 	Pattern pEqual = Pattern.compile("^equal[ ]+[[0-9]|[a-z]]+[ ]+[[0-9]|[a-z]]+",Pattern.CASE_INSENSITIVE);
+	//atom
 	Pattern pAtom = Pattern.compile("^atom",Pattern.CASE_INSENSITIVE);
+	//list
 	Pattern pList = Pattern.compile("^list",Pattern.CASE_INSENSITIVE);
+	//condition
 	Pattern pCond = Pattern.compile("^cond",Pattern.CASE_INSENSITIVE);
+	//define function
 	Pattern pDefun = Pattern.compile("^defun",Pattern.CASE_INSENSITIVE);
+	//call function
 	Pattern pCallfun = Pattern.compile("^[a-z][a-z0-9_]*",Pattern.CASE_INSENSITIVE);
+	//arithmetics operations
 	Pattern pArithmetics = Pattern.compile("^[*+\\-/][0-9*+\\-/ ]*",Pattern.CASE_INSENSITIVE);
 	/*****************************************************************************************/
+	
+	/*******************PARAMETERS*******************/
 	Variables variables = new Variables();
 	Arithmetics arithmetics = new Arithmetics();
 	Predicates predicates = new Predicates();
 	Functions functions = new Functions();
+	/************************************************/
 	
 	/**
 	 * General evaluation to find syntax errors
@@ -379,6 +396,7 @@ public class Lexer {
 		}
 		return val;
 	}
+	
 	/**
 	 * Function that evaluates a predicate and return T if the statement is true and NIL if is false
 	 * @param pred predicate to evaluate

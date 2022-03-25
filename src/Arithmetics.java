@@ -15,7 +15,6 @@ import java.util.*;
 
 public class Arithmetics {
 	/**
-	 * 
 	 * @param c character to evaluate
 	 * @return true if its an operator 
 	 * https://algorithms.tutorialhorizon.com/evaluation-of-prefix-expressions-polish-notation-set-2/
@@ -28,6 +27,12 @@ public class Arithmetics {
 			return false;
 		}
 	}
+	
+	/**
+	 * Evaluation of prefix operations
+	 * @param expression string
+	 * @return stack result of prefix operation
+	 */
 	public double prefixcalc(String expression) throws InterpreterException{
 		Stack<Double> stack = new Stack<Double>();
 		for(int i =expression.length()-1;i>=0;i--) {

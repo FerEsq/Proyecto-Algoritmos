@@ -15,8 +15,11 @@ import java.util.LinkedHashMap;
  */
 
 public class Functions {
+	
+	/*******************PARAMETERS*******************/
 	HashMap<String, String> functions = new HashMap<String, String>();
 	HashMap<String, LinkedHashMap<String, String>> functionParameters = new HashMap<String, LinkedHashMap<String, String>>();
+	
 	/**
 	 * Function that creates a new function
 	 * @param name name of the function
@@ -37,6 +40,7 @@ public class Functions {
 		functionParameters.put(name, parametersMap);
 		functions.put(name, instructionString);
 	}
+	
 	/**
 	 * Function that returns the instructions of the function called
 	 * @param name name of the function to call

@@ -13,6 +13,11 @@
  */
 
 public class InterpreterException extends Exception{
+	
+	/**
+	 * @param message string
+	 * @return message
+	 */
 	public InterpreterException(String message) {
 		super(message);
 	}
