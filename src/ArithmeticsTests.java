@@ -1,3 +1,4 @@
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,15 @@ class ArithmeticsTests {
 		Arithmetics ats = new Arithmetics();
 		String expression = "/ 6 2";
 		assertEquals(3.0, ats.prefixcalc(expression));
+	}
+	
+	@Test
+	void errorArithmeticsTest() throws InterpreterException {
+		Arithmetics ats = new Arithmetics();
+		String expression = "@ 6 2";
+		
+		Throwable exception = assertThrows(InterpreterException.class, () -> ats.prefixcalc(expression));
+	    assertEquals("Arithmetic error", exception.getMessage());
 	}
 
 }

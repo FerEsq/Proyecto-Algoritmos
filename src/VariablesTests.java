@@ -1,3 +1,4 @@
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
@@ -21,11 +22,10 @@ class VariablesTests {
 	@Test
 	void getVarETest() throws InterpreterException {
 		Variables var = new Variables();
+		String name = "x";
 		
-		assertThrows(InterpreterException.class, () -> {
-			String name = "x";
-			var.getVar(name);
-		});
+		Throwable exception = assertThrows(InterpreterException.class, () -> var.getVar(name));
+	    assertEquals("Variable x not found", exception.getMessage());
 	}
 	
 	// ----------------- get variable true -----------------
