@@ -336,7 +336,7 @@ public class Lexer {
 							String[] param = paramsString.split(",");
 							for(int j=0; j<param.length;j++) {//replace the variables with their values
 								if(variables.isVar(param[i])) {
-									paramsString = paramsString.replace(param[i], variables.getVar(param[i])+"");
+									paramsString = paramsString.replace(param[i], variables.getVar(param[i]).intValue()+"");
 								}
 							}
 							String lexedInstruc =functions.functionCall(tokens[0],paramsString);//searches for the function and return the operations in it
