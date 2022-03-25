@@ -16,7 +16,8 @@ import java.util.Scanner;
 public class Main {
 
 	/**
-	 * @param args
+	 * Main
+	 * @param args string[]
 	 */
 	public static void main(String[] args) {
 		Variables var = new Variables();
